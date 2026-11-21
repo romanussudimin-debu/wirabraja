@@ -84,6 +84,10 @@ func _uji_audio() -> void:
 			hilang.append(nama)
 	_cek(hilang.is_empty(), "semua %d file audio terdaftar tersedia %s" % [AudioManager.SFX.size() + AudioManager.MUSIK.size(), hilang])
 	_cek(AudioServer.get_bus_index("Musik") != -1 and AudioServer.get_bus_index("SFX") != -1, "bus audio Musik & SFX dibuat")
+	# Wajib untuk versi Web: bus yang dibuat saat runtime tidak bersuara pada mode audio sample.
+	var tata_bus := load("res://default_bus_layout.tres") as AudioBusLayout
+	_cek(tata_bus != null and str(tata_bus.get("bus/1/name")) == "Musik" and str(tata_bus.get("bus/2/name")) == "SFX",
+			"bus Musik & SFX didefinisikan di default_bus_layout.tres (syarat suara di versi Web)")
 
 
 # ------------------------------------------------------------------ arena uji varian

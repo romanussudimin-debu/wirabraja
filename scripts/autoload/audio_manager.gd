@@ -5,7 +5,9 @@ extends Node
 ## (lihat tabel MUSIK dan SFX di bawah, juga audio/README.md). Bila sebuah file
 ## tidak ada, permainan tetap berjalan tanpa suara itu (hanya muncul peringatan sekali).
 ##
-## Bus audio "Musik" dan "SFX" dibuat otomatis bila belum ada.
+## Bus audio "Musik" dan "SFX" didefinisikan di default_bus_layout.tres. File itu WAJIB ada untuk
+## versi Web: pada mode audio "sample" milik Godot Web, bus yang baru dibuat saat runtime tidak
+## tersambung ke speaker sehingga semua suara hilang. Pembuatan bus saat runtime hanya cadangan.
 ## Tombol M: musik hidup/mati.
 
 const MUSIK: Dictionary = {
@@ -36,11 +38,11 @@ const SFX: Dictionary = {
 
 ## Volume dasar per efek (dB). Efek yang tidak tercantum memakai 0 dB.
 const VOLUME_SFX: Dictionary = {
-	"langkah": -14.0, "ayun": -6.0, "lompat": -8.0, "gong": -2.0, "keprak": -4.0,
+	"langkah": -14.0, "ayun": -6.0, "lompat": -8.0, "gong": -5.0, "keprak": -4.0,
 }
 
 const JUMLAH_PEMUTAR_SFX := 12
-const VOLUME_MUSIK_DB := -8.0
+const VOLUME_MUSIK_DB := -10.0
 
 var musik_aktif: bool = true
 var _cache: Dictionary = {}

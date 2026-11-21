@@ -85,7 +85,7 @@ Uji otomatis (narasi, audio, gerak, serangan, 3 varian buta, gelombang, 3 pola b
 ```bash
 godot --headless --path . res://tests/uji_alur.tscn
 ```
-Hasil v1.1: **51 pemeriksaan lulus** (v1.0: 19).
+Hasil: **52 pemeriksaan lulus** (v1.0: 19).
 
 ## Audio
 Musik dan efek suara adalah placeholder bernuansa gamelan yang disintesis sendiri (tanpa sampel pihak ketiga).
