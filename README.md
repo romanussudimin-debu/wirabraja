@@ -10,8 +10,16 @@ lalu menghadapi raksasa **Ditya Kalamurka**.
 - **Versi:** 1.1 (Fase 2: variasi musuh, bos 3 pola + fase 2, audio gamelan, narasi dalang)
 - **Engine:** Godot 4.5 atau lebih baru (GDScript), platform PC Windows
 
+## ▶ Main langsung di browser
+**https://romanussudimin-debu.github.io/wirabraja/**
+
+Buka di Chrome/Edge/Firefox di laptop/PC (butuh keyboard + mouse). Tunggu hingga termuat
+(±40 MB saat pertama kali), klik layar sekali, lalu ikuti narasi. Saat di level, **klik layar**
+untuk mengunci mouse agar kamera bisa diputar. Versi web dibangun ulang otomatis oleh
+GitHub Actions (`.github/workflows/web.yml`) setiap ada perubahan di cabang `main`.
+
 ## Cara membuka dan menjalankan
-1. Unduh **Godot 4.5 (Standard)** atau versi yang lebih baru: https://godotengine.org/download
+1. Unduh **Godot 4.5 (Standard)** atau versi yang lebih baru (versi web dibangun dengan Godot 4.7.2): https://godotengine.org/download
 2. Jalankan Godot → **Import** → pilih file `project.godot` di folder ini → **Import & Edit**.
    (Saat pertama dibuka Godot mengimpor aset beberapa detik.)
 3. Tekan **F5** (atau tombol ▶ di kanan atas) untuk bermain.

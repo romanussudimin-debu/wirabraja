@@ -17,6 +17,10 @@ var _yaw: float = 0.0
 var _pitch: float = 0.0
 var _sisa_guncang: float = 0.0
 var _kekuatan_guncang: float = 0.0
+## Waktu (ms) terakhir mouse dikunci. Di browser, gerakan pertama setelah penguncian
+## kadang berupa lonjakan besar, jadi diabaikan sebentar.
+var _waktu_kunci_ms: int = 0
+const BATAS_GERAK_PER_EVENT := 150.0
 
 
 func _ready() -> void:
@@ -29,9 +33,13 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		var gerak := event as InputEventMouseMotion
-		_yaw -= gerak.relative.x * sensitivitas_mouse
-		_pitch -= gerak.relative.y * sensitivitas_mouse
+		if Time.get_ticks_msec() - _waktu_kunci_ms < 150:
+			return
+		var gerak := (event as InputEventMouseMotion).relative
+		gerak = gerak.clamp(Vector2(-BATAS_GERAK_PER_EVENT, -BATAS_GERAK_PER_EVENT),
+				Vector2(BATAS_GERAK_PER_EVENT, BATAS_GERAK_PER_EVENT))
+		_yaw -= gerak.x * sensitivitas_mouse
+		_pitch -= gerak.y * sensitivitas_mouse
 		_pitch = clampf(_pitch, deg_to_rad(batas_bawah_derajat), deg_to_rad(batas_atas_derajat))
 	elif event.is_action_pressed("lepas_mouse"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -39,6 +47,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		# Klik pertama hanya mengunci mouse kembali, bukan menyerang.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		_waktu_kunci_ms = Time.get_ticks_msec()
 		get_viewport().set_input_as_handled()
 
 
