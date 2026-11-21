@@ -7,7 +7,7 @@ lalu menghadapi raksasa **Ditya Kalamurka**.
 
 - **Penyusun:** I Gusti Agung Ayu Putu Wulan Aristina (NIM 240030296)
 - **Prodi/Kampus:** Sistem Informasi, Institut Teknologi dan Bisnis STIKOM Bali
-- **Versi:** 1.1 (Fase 2: variasi musuh, bos 3 pola + fase 2, audio gamelan, narasi dalang)
+- **Versi:** 2.0 (UTS — prototipe final: menu, jeda & pengaturan, kombo, menghindar, Ajian Braja, jamu, layar hasil & rekor)
 - **Engine:** Godot 4.5 atau lebih baru (GDScript), platform PC Windows
 
 ## ▶ Main langsung di browser
@@ -23,7 +23,7 @@ GitHub Actions (`.github/workflows/web.yml`) setiap ada perubahan di cabang `mai
 2. Jalankan Godot → **Import** → pilih file `project.godot` di folder ini → **Import & Edit**.
    (Saat pertama dibuka Godot mengimpor aset beberapa detik.)
 3. Tekan **F5** (atau tombol ▶ di kanan atas) untuk bermain.
-   Scene utama: `scenes/ui/narasi_pembuka.tscn` (narasi), lalu otomatis masuk `scenes/level/level_1.tscn`.
+   Scene utama: `scenes/ui/menu_utama.tscn` → narasi pembuka → `scenes/level/level_1.tscn`.
 
 ### Membuat file .exe (opsional)
 Menu **Project → Export… → Add… → Windows Desktop**. Bila diminta, unduh *export templates*
@@ -35,9 +35,11 @@ lewat **Editor → Manage Export Templates**, lalu klik **Export Project**.
 | W A S D / tombol panah | Bergerak (relatif terhadap kamera) |
 | Shift kiri (tahan) | Berlari |
 | Spasi | Melompat |
-| Klik kiri | Serangan gada |
+| Klik kiri | Serangan gada (klik lagi saat mengayun = kombo, pukulan ke-3 paling kuat) |
+| Klik kanan / Ctrl | Menghindar (melesat singkat, kebal sesaat) |
+| Q | **Ajian Braja** saat bar kasekten penuh (gelombang emas melukai semua musuh dalam 7 m) |
 | Gerakan mouse | Memutar kamera |
-| Esc | Melepas kursor mouse (klik untuk mengunci lagi) |
+| Esc / P | Jeda (Lanjutkan, Pengaturan, Ulangi Level, Menu Utama) |
 | M | Musik hidup/mati |
 | R | Mengulang level setelah menang/kalah |
 
@@ -60,6 +62,11 @@ Kalahkan **3 gelombang buta (12 ekor)**, lalu bos. Kenali musuh dari warna dan u
 
 Saat HP-nya di bawah 50%, bos **murka** (kulit memerah): lebih cepat, hantaman dua kali, bala lebih banyak.
 **Menang:** bos kalah. **Kalah:** HP habis. Tekan **R** untuk mengulang.
+
+**Baru di v2.0:** isi bar **kasekten** dengan memukul musuh lalu tekan **Q** untuk Ajian Braja. Buta kadang
+menjatuhkan **jamu** (kunyit asam, beras kencur, temulawak) yang memulihkan 25 HP. Di akhir permainan tampil
+statistik, peringkat (Ksatria Utama / Madya / Muda), dan rekor waktu terbaik. Pengaturan volume, sensitivitas
+mouse, dan layar penuh tersimpan otomatis.
 
 ## Struktur folder
 ```
@@ -85,7 +92,7 @@ Uji otomatis (narasi, audio, gerak, serangan, 3 varian buta, gelombang, 3 pola b
 ```bash
 godot --headless --path . res://tests/uji_alur.tscn
 ```
-Hasil: **52 pemeriksaan lulus** (v1.0: 19).
+Hasil: **74 pemeriksaan lulus** (v1.0: 19, v1.1: 52).
 
 ## Audio
 Musik dan efek suara adalah placeholder bernuansa gamelan yang disintesis sendiri (tanpa sampel pihak ketiga).

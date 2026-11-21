@@ -15,8 +15,15 @@ const WARNA_MARUN := Color(0.55, 0.1, 0.12)
 @onready var _layar_akhir: Control = %LayarAkhir
 @onready var _judul_akhir: Label = %JudulAkhir
 @onready var _sub_akhir: Label = %SubAkhir
+@onready var _bar_kasekten: ProgressBar = %BarKasekten
+@onready var _label_kasekten: Label = %LabelKasekten
+@onready var _label_kombo: Label = %LabelKombo
+@onready var _statistik: Label = %StatistikAkhir
+@onready var _tombol_akhir: HBoxContainer = %TombolAkhir
 
 var _tween_pengumuman: Tween
+var _pemain: Pemain
+var _kombo_terakhir: int = 0
 var _gelombang: int = 1
 var _total_gelombang: int = 1
 
@@ -24,6 +31,10 @@ var _total_gelombang: int = 1
 func _ready() -> void:
 	_gaya_bar(_bar_hp, Color(0.75, 0.12, 0.12))
 	_gaya_bar(_bar_bos, Color(0.45, 0.05, 0.3))
+	_gaya_bar(_bar_kasekten, Color(0.95, 0.72, 0.2))
+	add_to_group("hud")
+	_label_kombo.modulate.a = 0.0
+	_tombol_akhir.theme = TemaJawa.ambil()
 	_panel_bos.visible = false
 	_layar_akhir.visible = false
 	_pengumuman.modulate.a = 0.0
@@ -36,6 +47,10 @@ func _ready() -> void:
 	if pemain:
 		pemain.hp_berubah.connect(_saat_hp_berubah)
 		_saat_hp_berubah(pemain.komponen_hp.hp, pemain.komponen_hp.hp_maks)
+		pemain.kasekten_berubah.connect(_saat_kasekten_berubah)
+		_saat_kasekten_berubah(pemain.kasekten, pemain.kasekten_maks)
+		pemain.ajian_dilepas.connect(func() -> void: tampilkan_pengumuman("Ajian Braja!", 1.0))
+		_pemain = pemain
 	_saat_musuh_berubah(GameManager.musuh_tersisa)
 
 
@@ -47,6 +62,31 @@ func tampilkan_pengumuman(teks: String, durasi: float = 3.0) -> void:
 	_tween_pengumuman.tween_property(_pengumuman, "modulate:a", 1.0, 0.25)
 	_tween_pengumuman.tween_interval(durasi)
 	_tween_pengumuman.tween_property(_pengumuman, "modulate:a", 0.0, 0.6)
+
+
+func _process(_delta: float) -> void:
+	# Tulisan kombo muncul saat pukulan ke-2 dan ke-3.
+	if _pemain and is_instance_valid(_pemain) and _pemain.kombo != _kombo_terakhir:
+		_kombo_terakhir = _pemain.kombo
+		if _kombo_terakhir >= 2:
+			_label_kombo.text = "Kombo x%d!" % _kombo_terakhir
+			_label_kombo.modulate.a = 1.0
+			_label_kombo.scale = Vector2(1.3, 1.3)
+			var t := create_tween()
+			t.tween_property(_label_kombo, "scale", Vector2.ONE, 0.15)
+			t.tween_interval(0.5)
+			t.tween_property(_label_kombo, "modulate:a", 0.0, 0.4)
+
+
+func _saat_kasekten_berubah(nilai: float, maks: float) -> void:
+	_bar_kasekten.max_value = maks
+	_bar_kasekten.value = nilai
+	if nilai >= maks:
+		_label_kasekten.text = "Kasekten penuh!  ·  Tekan Q: Ajian Braja"
+		_label_kasekten.add_theme_color_override("font_color", Color(1, 0.9, 0.4, 1))
+	else:
+		_label_kasekten.text = "Kasekten %d%%  ·  Q: Ajian Braja" % roundi(nilai / maks * 100.0)
+		_label_kasekten.add_theme_color_override("font_color", Color(0.95, 0.78, 0.32, 0.75))
 
 
 func atur_gelombang(ke: int, total: int) -> void:
@@ -97,15 +137,32 @@ func _saat_state_berubah(state_baru: GameManager.State) -> void:
 			_label_musuh.text = "Kalahkan sang raksasa!"
 		GameManager.State.MENANG:
 			_panel_bos.visible = false
-			_tampilkan_layar_akhir("MENANG!", "Alun-alun keraton kembali tenteram.\nTekan R untuk mengulang", WARNA_EMAS)
+			var peringkat: Array = GameManager.hitung_peringkat()
+			var gelar := "%s (%s)" % [peringkat[1], peringkat[0]]
+			var rekor_baru := Pengaturan.catat_kemenangan(GameManager.waktu_main, gelar)
+			_tampilkan_layar_akhir("MENANG!", "Alun-alun keraton kembali tenteram.\nPeringkat: %s%s" % [
+					gelar, "  —  REKOR BARU!" if rekor_baru else ""], WARNA_EMAS)
 		GameManager.State.KALAH:
-			_tampilkan_layar_akhir("KALAH", "Raden Wirabraja gugur di medan laga.\nTekan R untuk mengulang", Color(0.9, 0.25, 0.2))
+			_tampilkan_layar_akhir("KALAH", "Raden Wirabraja gugur di medan laga.", Color(0.9, 0.25, 0.2))
 
 
 func _tampilkan_layar_akhir(judul: String, sub: String, warna: Color) -> void:
 	_judul_akhir.text = judul
 	_judul_akhir.add_theme_color_override("font_color", warna)
 	_sub_akhir.text = sub
+	_statistik.text = "Waktu %s   ·   Buta dikalahkan %d   ·   Damage diterima %d\nAjian Braja %dx   ·   Jamu diminum %d   ·   Rekor %s\n\nTekan R untuk mengulang" % [
+			Pengaturan.format_waktu(GameManager.waktu_main), GameManager.buta_dikalahkan,
+			GameManager.damage_diterima, GameManager.ajian_dipakai, GameManager.jamu_diminum,
+			Pengaturan.format_waktu(Pengaturan.rekor_waktu) if Pengaturan.rekor_waktu > 0.0 else "-"]
+	for anak: Node in _tombol_akhir.get_children():
+		anak.queue_free()
+	_tombol_akhir.add_child(TemaJawa.tombol("Ulangi", func() -> void: GameManager.ulang_level()))
+	_tombol_akhir.add_child(TemaJawa.tombol("Menu Utama", func() -> void:
+		get_tree().change_scene_to_file("res://scenes/ui/menu_utama.tscn")))
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if _tween_pengumuman and _tween_pengumuman.is_valid():
+		_tween_pengumuman.kill()
+	_pengumuman.modulate.a = 0.0
 	_layar_akhir.visible = true
 	_layar_akhir.modulate.a = 0.0
 	create_tween().tween_property(_layar_akhir, "modulate:a", 1.0, 0.8)

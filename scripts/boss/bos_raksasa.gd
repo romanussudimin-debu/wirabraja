@@ -375,6 +375,13 @@ func _masuk_fase_2() -> void:
 	# Jeda pola diringkas agar fase 2 langsung terasa berbeda.
 	_sisa_jeda_panggil = minf(_sisa_jeda_panggil, 3.0)
 	_sisa_jeda_serbu = minf(_sisa_jeda_serbu, 2.0)
+	# Dua jamu jatuh di dekat pemain sebagai bekal menghadapi fase murka (v2.0).
+	if _target:
+		for i in 2:
+			var jamu := Buta.SCENE_JAMU.instantiate() as Node3D
+			get_parent().add_child(jamu)
+			var p := _target.global_position + Vector3(cos(i * PI) * 3.0, 0.0, 2.0)
+			jamu.global_position = Vector3(clampf(p.x, -29, 29), 0.0, clampf(p.z, -29, 29))
 
 
 func _waktu(dasar: float) -> float:

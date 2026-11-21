@@ -38,11 +38,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		var gerak := (event as InputEventMouseMotion).relative
 		gerak = gerak.clamp(Vector2(-BATAS_GERAK_PER_EVENT, -BATAS_GERAK_PER_EVENT),
 				Vector2(BATAS_GERAK_PER_EVENT, BATAS_GERAK_PER_EVENT))
-		_yaw -= gerak.x * sensitivitas_mouse
-		_pitch -= gerak.y * sensitivitas_mouse
+		var sens := sensitivitas_mouse * Pengaturan.sensitivitas_mouse
+		_yaw -= gerak.x * sens
+		_pitch -= gerak.y * sens
 		_pitch = clampf(_pitch, deg_to_rad(batas_bawah_derajat), deg_to_rad(batas_atas_derajat))
-	elif event.is_action_pressed("lepas_mouse"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif event is InputEventMouseButton and event.is_pressed() \
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		# Klik pertama hanya mengunci mouse kembali, bukan menyerang.

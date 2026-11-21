@@ -11,23 +11,39 @@ const BOS := preload("res://scenes/boss/bos_raksasa.tscn")
 const KILAT := preload("res://scenes/enemies/buta_kilat.tscn")
 const GEMPAL := preload("res://scenes/enemies/buta_gempal.tscn")
 const PELEMPAR := preload("res://scenes/enemies/buta_pelempar.tscn")
+const PRAJURIT := preload("res://scenes/enemies/buta.tscn")
+const MENU := preload("res://scenes/ui/menu_utama.tscn")
+const JAMU := preload("res://scenes/items/jamu.tscn")
 
 var _gagal: int = 0
 var _jumlah: int = 0
 
 
 func _ready() -> void:
+	# Simpan rekor & pengaturan asli agar uji tidak mengubah data pemain.
+	var rekor_asli := [Pengaturan.rekor_waktu, Pengaturan.rekor_peringkat]
+	await _jalankan_semua()
+	Pengaturan.rekor_waktu = rekor_asli[0]
+	Pengaturan.rekor_peringkat = rekor_asli[1]
+	Pengaturan.simpan()
+	AudioManager.hentikan_semua()
+	await _tunggu(0.3)
+	print("\n==== HASIL: %s (%d pemeriksaan, %d gagal) ====" % ["LULUS" if _gagal == 0 else "GAGAL", _jumlah, _gagal])
+	get_tree().quit(1 if _gagal > 0 else 0)
+
+
+func _jalankan_semua() -> void:
+	await _uji_menu_dan_pengaturan()
 	await _uji_narasi()
 	_uji_audio()
+	await _uji_kombo()
+	await _uji_hindar_dan_ajian()
+	await _uji_jamu()
 	await _uji_varian_kilat()
 	await _uji_varian_gempal()
 	await _uji_varian_pelempar()
 	await _uji_level_dan_bos()
 	await _uji_kalah()
-	AudioManager.hentikan_semua()
-	await _tunggu(0.3)
-	print("\n==== HASIL: %s (%d pemeriksaan, %d gagal) ====" % ["LULUS" if _gagal == 0 else "GAGAL", _jumlah, _gagal])
-	get_tree().quit(1 if _gagal > 0 else 0)
 
 
 func _cek(kondisi: bool, pesan: String) -> void:
@@ -88,6 +104,127 @@ func _uji_audio() -> void:
 	var tata_bus := load("res://default_bus_layout.tres") as AudioBusLayout
 	_cek(tata_bus != null and str(tata_bus.get("bus/1/name")) == "Musik" and str(tata_bus.get("bus/2/name")) == "SFX",
 			"bus Musik & SFX didefinisikan di default_bus_layout.tres (syarat suara di versi Web)")
+
+
+# ------------------------------------------------------------------ v2.0: menu, pengaturan, kombat
+
+func _uji_menu_dan_pengaturan() -> void:
+	print("\n-- Menu utama & pengaturan (v2.0) --")
+	var m := MENU.instantiate()
+	m.pindah_otomatis = false
+	add_child(m)
+	await _tunggu(0.3)
+	var tombol: Array[String] = []
+	for b: Node in m.find_children("*", "Button", true, false):
+		tombol.append((b as Button).text)
+	_cek("Mulai Lakon" in tombol and "Pengaturan" in tombol and "Kontrol" in tombol, "menu utama memiliki tombol %s" % [tombol])
+	var dimulai := [false]
+	m.mulai_ditekan.connect(func() -> void: dimulai[0] = true)
+	for b: Node in m.find_children("*", "Button", true, false):
+		if (b as Button).text == "Mulai Lakon":
+			(b as Button).pressed.emit()
+	_cek(dimulai[0], "tombol Mulai Lakon memulai permainan")
+	m.queue_free()
+	var lama := Pengaturan.volume_musik
+	Pengaturan.ubah("volume_musik", 0.5)
+	var db := AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Musik"))
+	_cek(absf(db - linear_to_db(0.5)) < 0.1, "pengaturan volume musik diterapkan ke bus (%.1f dB)" % db)
+	Pengaturan.volume_musik = 0.1
+	Pengaturan.muat()
+	_cek(absf(Pengaturan.volume_musik - 0.5) < 0.001, "pengaturan tersimpan ke file dan dapat dimuat ulang")
+	Pengaturan.ubah("volume_musik", lama)
+	await _tunggu(0.1)
+
+
+func _uji_kombo() -> void:
+	print("\n-- Kombo 3 pukulan (v2.0) --")
+	var a := _arena(PRAJURIT, Vector3(0, 0, -1.7))
+	var pemain: Pemain = a[1]
+	var buta: Buta = a[2]
+	buta.komponen_hp.inisialisasi(9999)
+	buta.ketahanan_dorong = 1.0
+	buta.set_physics_process(false)
+	await _tunggu(0.3)
+	var hp := [buta.komponen_hp.hp]
+	var selisih: Array[int] = []
+	for i in 3:
+		pemain._minta_serang = true
+		await get_tree().physics_frame
+		await _tunggu(0.2)
+		pemain._minta_serang = true
+		await _tunggu(0.25)
+		selisih.append(hp[0] - buta.komponen_hp.hp)
+		hp[0] = buta.komponen_hp.hp
+		if i == 0:
+			_cek(pemain.kombo >= 2, "klik saat mengayun menyambung ke pukulan ke-2 (kombo %d)" % pemain.kombo)
+	_cek(selisih.size() == 3 and selisih[2] > selisih[0], "pukulan ke-3 lebih kuat (damage %s)" % [selisih])
+	_cek(pemain.kasekten > 0.0, "pukulan yang mengenai mengisi kasekten (%.0f)" % pemain.kasekten)
+	a[0].queue_free()
+	await _tunggu(0.1)
+
+
+func _uji_hindar_dan_ajian() -> void:
+	print("\n-- Menghindar & Ajian Braja (v2.0) --")
+	var a := _arena(PRAJURIT, Vector3(0, 0, -5.0))
+	var pemain: Pemain = a[1]
+	var dekat: Buta = a[2]
+	dekat.set_physics_process(false)
+	var jauh := PRAJURIT.instantiate() as Buta
+	a[0].add_child(jauh)
+	jauh.global_position = Vector3(0, 0, -13.0)
+	jauh.set_physics_process(false)
+	await _tunggu(0.3)
+	pemain._minta_hindar = true
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_cek(pemain.state == Pemain.State.MENGHINDAR and Vector2(pemain.velocity.x, pemain.velocity.z).length() > 10.0,
+			"menghindar: pemain melesat (%.1f m/s)" % Vector2(pemain.velocity.x, pemain.velocity.z).length())
+	var hp := pemain.komponen_hp.hp
+	pemain.terima_serangan(30, Vector3.BACK)
+	_cek(pemain.komponen_hp.hp == hp, "menghindar memberi kekebalan sesaat")
+	await _tunggu(1.0)
+	pemain.global_position = Vector3.ZERO
+	pemain._minta_ajian = true
+	await _tunggu(0.6)
+	_cek(dekat.komponen_hp.hp == dekat.komponen_hp.hp_maks, "Ajian tidak bisa dipakai sebelum kasekten penuh")
+	pemain.tambah_kasekten(999.0)
+	pemain._minta_ajian = true
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_cek(pemain.state == Pemain.State.AJIAN and pemain.kasekten == 0.0, "Q saat kasekten penuh: Ajian Braja dimulai, kasekten habis")
+	await _tunggu(pemain.waktu_ancang_ajian + 0.2)
+	_cek(dekat.komponen_hp.mati or dekat.komponen_hp.hp < dekat.komponen_hp.hp_maks, "Ajian melukai buta dalam radius 7 m")
+	_cek(jauh.komponen_hp.hp == jauh.komponen_hp.hp_maks, "buta di luar radius tidak terkena")
+	_cek(GameManager.ajian_dipakai == 1, "statistik ajian tercatat")
+	a[0].queue_free()
+	await _tunggu(0.1)
+
+
+func _uji_jamu() -> void:
+	print("\n-- Jamu (v2.0) --")
+	var a := _arena(PRAJURIT, Vector3(0, 0, -30.0))
+	var pemain: Pemain = a[1]
+	(a[2] as Buta).set_physics_process(false)
+	await _tunggu(0.2)
+	var j := JAMU.instantiate() as Jamu
+	a[0].add_child(j)
+	j.global_position = Vector3.ZERO
+	await _tunggu(0.4)
+	_cek(is_instance_valid(j) and not j._diambil, "jamu tidak diambil saat HP penuh")
+	pemain.terima_serangan(40, Vector3.BACK)
+	await _tunggu(0.5)
+	_cek(pemain.komponen_hp.hp == pemain.hp_maks - 40 + 25, "jamu memulihkan 25 HP (HP %d)" % pemain.komponen_hp.hp)
+	_cek(GameManager.jamu_diminum == 1, "statistik jamu tercatat")
+	var b := PRAJURIT.instantiate() as Buta
+	b.peluang_jamu = 1.0
+	a[0].add_child(b)
+	b.global_position = Vector3(5, 0, 5)
+	await _tunggu(0.1)
+	b.terima_serangan(9999, Vector3.FORWARD)
+	await _tunggu(0.2)
+	_cek(get_tree().get_nodes_in_group("jamu").size() >= 1, "buta yang kalah dapat menjatuhkan jamu")
+	a[0].queue_free()
+	await _tunggu(0.1)
 
 
 # ------------------------------------------------------------------ arena uji varian
@@ -188,6 +325,12 @@ func _uji_level_dan_bos() -> void:
 	_cek(GameManager.musuh_tersisa == 12, "total buta 3 gelombang = 12 (didapat %d)" % GameManager.musuh_tersisa)
 	_cek(get_tree().get_nodes_in_group("musuh").size() == 4, "hanya gelombang 1 (4 buta) yang aktif di awal")
 	_cek(AudioManager.nama_musik_sekarang() == "pertempuran", "musik pertempuran diputar")
+	var jeda := level.get_node("MenuJeda") as MenuJeda
+	await _tekan("jeda")
+	_cek(get_tree().paused and jeda.sedang_jeda(), "Esc/P menjeda permainan (v2.0)")
+	jeda.lanjutkan()
+	await get_tree().process_frame
+	_cek(not get_tree().paused, "Lanjutkan melanjutkan permainan")
 
 	var z0 := pemain.global_position.z
 	Input.action_press("maju")
@@ -304,6 +447,9 @@ func _uji_level_dan_bos() -> void:
 	_cek(GameManager.state == GameManager.State.MENANG, "bos kalah -> state MENANG")
 	_cek(hud.get_node("%LayarAkhir").visible and hud.get_node("%JudulAkhir").text == "MENANG!", "HUD menampilkan teks MENANG")
 	_cek(AudioManager.nama_musik_sekarang() == "", "musik berhenti saat menang (diganti sfx kemenangan)")
+	_cek((hud.get_node("%SubAkhir") as Label).text.contains("Peringkat") and (hud.get_node("%StatistikAkhir") as Label).text.contains("Buta dikalahkan 12"),
+			"layar hasil menampilkan peringkat & statistik (v2.0)")
+	_cek(Pengaturan.rekor_waktu > 0.0 and hud.get_node("%TombolAkhir").get_child_count() == 2, "rekor waktu tersimpan; tombol Ulangi & Menu Utama tersedia")
 	level.queue_free()
 	await _tunggu(0.3)
 

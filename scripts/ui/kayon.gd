@@ -11,7 +11,9 @@ extends Control
 
 
 func _ready() -> void:
-	resized.connect(queue_redraw)
+	resized.connect(func() -> void:
+		pivot_offset = Vector2(size.x * 0.5, size.y)
+		queue_redraw())
 	pivot_offset = Vector2(size.x * 0.5, size.y)
 
 

@@ -45,6 +45,10 @@ enum State { DIAM, MENGEJAR, ANCANG, PULIH, TERKENA, MATI }
 ## False untuk buta panggilan bos (tidak dihitung dalam jumlah buta misi).
 @export var dihitung_misi: bool = true
 @export var nama_jenis: String = "Buta Prajurit"
+## Peluang menjatuhkan jamu saat kalah (0..1). Buta panggilan bos memakai 40% dari nilai ini.
+@export_range(0.0, 1.0) var peluang_jamu: float = 0.3
+
+const SCENE_JAMU := preload("res://scenes/items/jamu.tscn")
 
 @onready var model: Node3D = $Model
 @onready var komponen_hp: KomponenHP = $KomponenHP
@@ -189,6 +193,8 @@ func _saat_mati() -> void:
 	collision_mask = 1
 	kalah.emit()
 	AudioManager.putar_sfx("buta_mati", global_position)
+	if randf() < peluang_jamu * (1.0 if dihitung_misi else 0.4):
+		jatuhkan_jamu.call_deferred()
 	if dihitung_misi:
 		GameManager.lapor_buta_kalah()
 	var t := create_tween()
@@ -196,6 +202,14 @@ func _saat_mati() -> void:
 	t.tween_interval(0.6)
 	t.tween_property(model, "scale", Vector3(0.01, 0.01, 0.01), 0.4)
 	t.tween_callback(queue_free)
+
+
+func jatuhkan_jamu() -> void:
+	if not is_inside_tree():
+		return
+	var jamu := SCENE_JAMU.instantiate() as Node3D
+	get_parent().add_child(jamu)
+	jamu.global_position = Vector3(global_position.x, 0.0, global_position.z)
 
 
 # ---------------------------------------------------------------- utilitas

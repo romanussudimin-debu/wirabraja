@@ -314,6 +314,22 @@ def sfx_semua() -> dict[str, np.ndarray]:
         tambah(kalah, bilah(frek(n, -1), 2.0, 0.7, lembut=True), i * 0.42, 0.6)
     tambah(kalah, gong_ageng(46, 4.0), 2.1, 1.0)
     s["kekalahan"] = normal(gema(kalah), 0.85)
+    # --- v2.0 ---
+    s["hindar"] = normal(wus(0.2, 1200, 3200), 0.55)
+    # Ajian Braja: desir naik + gong + kilau saron tinggi.
+    aj = np.zeros(int(2.2 * SR))
+    tambah(aj, wus(0.5, 300, 2500), 0.0, 0.8)
+    tambah(aj, gong_ageng(58, 2.0), 0.42, 0.9)
+    for i, n in enumerate((1, 3, 5, 1)):
+        tambah(aj, bilah(frek(n, 1 if i < 3 else 2), 0.8, 0.6), 0.42 + i * 0.06, 0.35)
+    s["ajian_braja"] = normal(gema(aj), 0.9)
+    # Jamu: dua denting saron naik (tanda pemulihan).
+    jm = np.zeros(int(1.2 * SR))
+    tambah(jm, bilah(frek(5, 1), 0.9), 0.0, 0.6)
+    tambah(jm, bilah(frek(1, 2), 1.0), 0.12, 0.6)
+    s["jamu"] = normal(gema(jm), 0.75)
+    # Klik tombol menu: ketukan bonang pendek.
+    s["klik"] = normal(pencon(frek(6, -1), 0.25, 0.08), 0.6)
     return s
 
 

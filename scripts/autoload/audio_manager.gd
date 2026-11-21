@@ -34,11 +34,15 @@ const SFX: Dictionary = {
 	"bos_raung": "res://audio/sfx/bos_raung.wav",
 	"gong": "res://audio/sfx/gong.wav",
 	"keprak": "res://audio/sfx/keprak.wav",
+	"hindar": "res://audio/sfx/hindar.wav",
+	"ajian": "res://audio/sfx/ajian_braja.wav",
+	"jamu": "res://audio/sfx/jamu.wav",
+	"klik": "res://audio/sfx/klik.wav",
 }
 
 ## Volume dasar per efek (dB). Efek yang tidak tercantum memakai 0 dB.
 const VOLUME_SFX: Dictionary = {
-	"langkah": -14.0, "ayun": -6.0, "lompat": -8.0, "gong": -5.0, "keprak": -4.0,
+	"langkah": -14.0, "ayun": -6.0, "klik": -8.0, "hindar": -6.0, "lompat": -8.0, "gong": -5.0, "keprak": -4.0,
 }
 
 const JUMLAH_PEMUTAR_SFX := 12

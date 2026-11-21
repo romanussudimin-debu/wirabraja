@@ -46,6 +46,37 @@ theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 16
 text = "HP 100 / 100"
 
+[node name="BarKasekten" type="ProgressBar" parent="Akar/PanelPemain"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 12)
+layout_mode = 2
+size_flags_horizontal = 0
+show_percentage = false
+
+[node name="LabelKasekten" type="Label" parent="Akar/PanelPemain"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.78, 0.32, 0.8)
+theme_override_colors/font_outline_color = Color(0.1, 0.05, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 15
+text = "Kasekten 0%  ·  Q: Ajian Braja"
+
+[node name="LabelKombo" type="Label" parent="Akar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.6
+anchor_top = 0.55
+anchor_right = 0.95
+anchor_bottom = 0.55
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.25, 0.04, 0.05, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 34
+text = "Kombo x3!"
+
 [node name="LabelMusuh" type="Label" parent="Akar"]
 unique_name_in_owner = true
 layout_mode = 1
@@ -124,7 +155,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 0.8)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 15
-text = "WASD gerak  ·  Shift lari  ·  Spasi lompat  ·  Klik kiri serang  ·  Mouse putar kamera  ·  Esc lepas mouse  ·  M musik"
+text = "WASD gerak  ·  Shift lari  ·  Spasi lompat  ·  Klik kiri serang (3x kombo)  ·  Klik kanan/Ctrl hindar  ·  Q ajian  ·  Esc jeda  ·  M musik"
 horizontal_alignment = 1
 
 [node name="LayarAkhir" type="ColorRect" parent="Akar"]
@@ -145,10 +176,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -400.0
-offset_top = -100.0
-offset_right = 400.0
-offset_bottom = 100.0
+offset_left = -420.0
+offset_top = -190.0
+offset_right = 420.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
@@ -171,3 +202,18 @@ theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 24
 text = "Tekan R untuk mengulang"
 horizontal_alignment = 1
+
+[node name="StatistikAkhir" type="Label" parent="Akar/LayarAkhir/Isi"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.88, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.04, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 19
+text = "Statistik"
+horizontal_alignment = 1
+
+[node name="TombolAkhir" type="HBoxContainer" parent="Akar/LayarAkhir/Isi"]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1

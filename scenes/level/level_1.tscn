@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/level/level_1.gd" id="1_lv"]
 [ext_resource type="PackedScene" path="res://scenes/boss/bos_raksasa.tscn" id="2_bos"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/buta_kilat.tscn" id="10_kl"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/buta_gempal.tscn" id="11_gp"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/buta_pelempar.tscn" id="12_pl"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_jeda.tscn" id="13_mj"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.3, 0.45, 0.7, 1)
@@ -208,3 +209,5 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -13)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11)
 
 [node name="HUD" parent="." instance=ExtResource("9_hud")]
+
+[node name="MenuJeda" parent="." instance=ExtResource("13_mj")]
