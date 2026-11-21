@@ -106,6 +106,12 @@ def tabel(doc: Document, kepala: list[str] | None, baris: list[list[str]], lebar
         t.columns[i].width = Cm(w)
         for row in t.rows:
             row.cells[i].width = Cm(w)
+    # Tabel tidak terpotong antarhalaman: setiap baris (kecuali terakhir) menempel ke baris berikutnya.
+    for j, row in enumerate(t.rows):
+        if j < len(t.rows) - 1:
+            for sel_ in row.cells:
+                for pr in sel_.paragraphs:
+                    pr.paragraph_format.keep_with_next = True
     doc.add_paragraph().paragraph_format.space_after = Pt(0)
 
 
@@ -166,8 +172,7 @@ def buat() -> Path:
     tabel(doc, None, [
         ["Nama / NIM", "I Gusti Agung Ayu Putu Wulan Aristina / 240030296"],
         ["Program Studi", "Sistem Informasi, Institut Teknologi dan Bisnis STIKOM Bali"],
-        ["Mata Kuliah", ""],
-        ["Dosen Pengampu", ""],
+        ["Mata Kuliah", "Pengembangan Permainan Digital"],
         ["Tahun", "2026"],
     ], [4.0, 12.0])
 
